@@ -1,0 +1,978 @@
+<!doctype html>
+<html lang="en">
+  <head>
+  <meta name="robots" content="noindex, nofollow"> <!-- generated-by-promote-content: staging-noindex -->
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Implementation Principles for AI-Native Systems</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --color-page: #f2f7ff;
+        --color-surface: #ffffff;
+        --color-text: #111827;
+        --color-muted: #5b6472;
+        --color-line: #d8e2f2;
+        --color-accent: #6d5dfc;
+        --color-accent-soft: #f0edff;
+        --color-signal: #0098a6;
+        --color-signal-soft: #ddf8fb;
+        --color-warning: #a96500;
+        --color-warning-soft: #fff2d9;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        background: var(--color-surface);
+        color: var(--color-text);
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", sans-serif;
+        line-height: 1.45;
+      }
+
+      a {
+        color: inherit;
+      }
+
+      a:focus-visible {
+        outline: 3px solid var(--color-accent);
+        outline-offset: 3px;
+        border-radius: 4px;
+      }
+
+      h1,
+      h2,
+      h3,
+      h4,
+      p {
+        margin: 0;
+      }
+
+      .page {
+        width: min(1120px, calc(100% - 40px));
+        margin: 0 auto;
+        padding: 64px 0 72px;
+      }
+
+      header {
+        max-width: none;
+        padding-bottom: 34px;
+      }
+
+      h1 {
+        max-width: none;
+        font-size: clamp(2rem, 3.3vw, 3.2rem);
+        line-height: 1.08;
+        font-weight: 740;
+        letter-spacing: 0;
+      }
+
+      .intro {
+        max-width: none;
+        margin-top: 18px;
+        color: var(--color-muted);
+        font-size: 1.06rem;
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: 240px minmax(0, 1fr);
+        gap: 52px;
+        align-items: start;
+      }
+
+      .toc {
+        position: sticky;
+        top: 24px;
+        display: grid;
+        gap: 14px;
+        padding-top: 2px;
+      }
+
+      .toc h2 {
+        color: var(--color-accent);
+        font-size: 0.76rem;
+        font-weight: 760;
+        letter-spacing: 0.09em;
+        text-transform: uppercase;
+      }
+
+      .toc nav {
+        display: grid;
+        gap: 9px;
+      }
+
+      .toc a {
+        color: var(--color-muted);
+        font-size: 0.9rem;
+        line-height: 1.3;
+        text-decoration: none;
+      }
+
+      .toc a:hover {
+        color: var(--color-text);
+      }
+
+      .toc a.active {
+        color: var(--color-accent);
+        font-weight: 720;
+      }
+
+      .toc-topic {
+        color: var(--color-text);
+        font-weight: 680;
+      }
+
+      .toc-topic.active {
+        color: var(--color-accent);
+      }
+
+      .toc-group {
+        display: grid;
+        gap: 8px;
+      }
+
+      .toc-children {
+        display: grid;
+        gap: 8px;
+        padding-left: 14px;
+      }
+
+      .toc-children a {
+        font-size: 0.86rem;
+      }
+
+      .content {
+        display: grid;
+        gap: 54px;
+        min-width: 0;
+      }
+
+      .section {
+        display: grid;
+        gap: 18px;
+      }
+
+      .section-title {
+        color: var(--color-accent);
+        font-size: 0.82rem;
+        font-weight: 760;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+
+      .purpose,
+      .framing {
+        max-width: 840px;
+      }
+
+      .purpose p {
+        color: var(--color-muted);
+      }
+
+      .framing {
+        padding: 28px;
+        border: 1px solid var(--color-line);
+        border-radius: 8px;
+        background: linear-gradient(180deg, var(--color-surface), var(--color-page));
+      }
+
+      .framing p {
+        color: var(--color-muted);
+      }
+
+      ol,
+      ul {
+        display: grid;
+        gap: 8px;
+        margin: 0;
+        padding-left: 22px;
+      }
+
+      li {
+        padding-left: 4px;
+      }
+
+      .framing ol,
+      .review-list {
+        margin-top: 14px;
+        color: var(--color-muted);
+      }
+
+      /* Principle sequence: acts, margin numerals, and pull-quotes */
+
+      .principles {
+        display: grid;
+      }
+
+      .act {
+        max-width: 760px;
+        padding: 56px 0 22px;
+      }
+
+      .act:first-child {
+        padding-top: 0;
+      }
+
+      .act-kicker {
+        color: var(--color-muted);
+        font-size: 0.78rem;
+        font-weight: 760;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        margin-bottom: 8px;
+      }
+
+      .act-title {
+        font-size: clamp(1.4rem, 2.2vw, 1.9rem);
+        font-weight: 730;
+        letter-spacing: -0.01em;
+        margin-bottom: 10px;
+      }
+
+      .act-desc {
+        color: var(--color-muted);
+        font-size: 1rem;
+        line-height: 1.5;
+        max-width: 640px;
+      }
+
+      .principle {
+        display: grid;
+        grid-template-columns: 84px minmax(0, 1fr);
+        column-gap: 24px;
+        row-gap: 14px;
+        padding: 32px 0;
+        max-width: 840px;
+        scroll-margin-top: 28px;
+      }
+
+      .principle-margin,
+      .principle > .body {
+        display: contents;
+      }
+
+      .numeral {
+        grid-column: 1;
+        grid-row: 1;
+        align-self: start;
+        margin: 0;
+        font-size: 2.35rem;
+        font-weight: 800;
+        line-height: 1;
+        color: var(--color-line);
+        letter-spacing: -0.02em;
+      }
+
+      .tag {
+        grid-column: 1;
+        grid-row: 2;
+        align-self: start;
+        margin: 0;
+        font-size: 0.76rem;
+        font-weight: 760;
+        letter-spacing: 0.09em;
+        text-transform: uppercase;
+        color: var(--color-accent);
+      }
+
+      .principle h3 {
+        grid-column: 2;
+        grid-row: 1;
+        align-self: start;
+        margin: 0;
+        font-size: clamp(1.2rem, 1.8vw, 1.5rem);
+        line-height: 1.2;
+        font-weight: 730;
+      }
+
+      .principle .detail {
+        grid-column: 2;
+        margin: 0;
+      }
+
+      .principle .detail:nth-of-type(1) {
+        grid-row: 2;
+      }
+
+      .principle .detail:nth-of-type(2) {
+        grid-row: 3;
+      }
+
+      .principle .detail:nth-of-type(3) {
+        grid-row: 4;
+      }
+
+      .principle .detail h4 {
+        margin-bottom: 6px;
+        color: var(--color-accent);
+        font-size: 0.72rem;
+        font-weight: 760;
+        letter-spacing: 0.09em;
+        text-transform: uppercase;
+      }
+
+      .principle .intent {
+        color: var(--color-muted);
+        font-size: 0.98rem;
+        line-height: 1.55;
+      }
+
+      .principle .quote {
+        border-radius: 10px;
+        padding: 16px 20px;
+        background: var(--color-accent-soft);
+      }
+
+      .principle .quote p {
+        font-style: italic;
+        color: var(--color-text);
+        font-size: 1rem;
+        line-height: 1.5;
+      }
+
+      .implications {
+        list-style: none;
+        gap: 8px;
+        padding-left: 0;
+      }
+
+      .implications li {
+        color: var(--color-muted);
+        font-size: 0.92rem;
+        line-height: 1.5;
+        padding-left: 16px;
+        position: relative;
+      }
+
+      .implications li::before {
+        content: "\2014";
+        position: absolute;
+        left: 0;
+        color: var(--color-accent);
+      }
+
+      .review {
+        max-width: 840px;
+        padding: 28px;
+        border: 1px solid var(--color-line);
+        border-radius: 8px;
+        background: var(--color-page);
+      }
+
+      .review h2 {
+        margin-bottom: 10px;
+        font-size: clamp(1.28rem, 2vw, 1.72rem);
+        line-height: 1.18;
+        font-weight: 730;
+      }
+
+      .review p {
+        color: var(--color-muted);
+      }
+
+      ::selection {
+        background: var(--color-accent-soft);
+        color: var(--color-text);
+      }
+
+      @media (max-width: 900px) {
+        .layout {
+          grid-template-columns: 1fr;
+          gap: 34px;
+        }
+
+        .toc {
+          position: static;
+          padding: 18px 0 4px;
+          border-top: 1px solid var(--color-line);
+          border-bottom: 1px solid var(--color-line);
+        }
+
+        .toc nav {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          column-gap: 18px;
+        }
+      }
+
+      @media (max-width: 640px) {
+        .page {
+          width: min(100% - 28px, 720px);
+          padding: 40px 0 48px;
+        }
+
+        header {
+          padding-bottom: 28px;
+        }
+
+        .toc nav {
+          grid-template-columns: 1fr;
+        }
+
+        .content {
+          gap: 42px;
+        }
+
+        .framing,
+        .review {
+          padding: 22px;
+        }
+      }
+
+      @media (max-width: 560px) {
+        .principle {
+          display: block;
+          padding: 26px 0;
+        }
+
+        .principle-margin {
+          display: flex;
+          align-items: baseline;
+          gap: 12px;
+          margin-bottom: 14px;
+        }
+
+        .principle > .body {
+          display: block;
+        }
+
+        .numeral {
+          font-size: 1.6rem;
+        }
+
+        .principle h3 {
+          margin-bottom: 16px;
+        }
+
+        .principle .detail {
+          margin-bottom: 16px;
+        }
+
+        .principle .detail:last-child {
+          margin-bottom: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <header>
+        <h1>Implementation Principles for AI-Native Systems</h1>
+        <p class="intro">These principles translate the Foundational Design Principles for AI-Native Systems into practical guidance for designing, building, evaluating, and improving AI-native systems.</p>
+      </header>
+
+      <div class="layout">
+        <aside class="toc" aria-labelledby="toc-title">
+          <h2 id="toc-title">Topics</h2>
+          <nav aria-label="Implementation principles">
+            <a class="toc-topic" href="#purpose">Purpose</a>
+            <a class="toc-topic" href="#framing-title">Principle framing</a>
+            <div class="toc-group">
+              <a class="toc-topic" href="#principles-title">Principles</a>
+              <div class="toc-children" aria-label="Principle list">
+                <a href="#principle-1">1. Clarify the outcome</a>
+                <a href="#principle-2">2. Separate what from how</a>
+                <a href="#principle-3">3. Make boundaries explicit</a>
+                <a href="#principle-4">4. Keep the path simple</a>
+                <a href="#principle-5">5. Make the system legible</a>
+                <a href="#principle-6">6. Put context within reach</a>
+                <a href="#principle-7">7. Treat knowledge as living</a>
+                <a href="#principle-8">8. Assign autonomy deliberately</a>
+                <a href="#principle-9">9. Design for shared work</a>
+                <a href="#principle-10">10. Handle uncertainty</a>
+                <a href="#principle-11">11. Make impact traceable</a>
+                <a href="#principle-12">12. Improve from use</a>
+              </div>
+            </div>
+            <a class="toc-topic" href="#review-criteria">Review criteria</a>
+          </nav>
+        </aside>
+
+        <div class="content">
+          <section class="section purpose" id="purpose" aria-labelledby="purpose-title">
+            <h2 class="section-title" id="purpose-title">Purpose</h2>
+            <p>These implementation principles translate the <a href="foundational-design-principles.html">foundational design principles</a> into practical guidance for architecture, solution design, interfaces, documentation, evaluation, and operating behavior.</p>
+            <p>They are intended to help AI-native systems become outcome-oriented, usable by both humans and AI agents, simple to operate, deliberate about autonomy, and grounded in enough context and evidence for sound decisions, actions, and improvement.</p>
+          </section>
+
+          <section class="section framing" aria-labelledby="framing-title">
+            <h2 class="section-title" id="framing-title">Principle Framing</h2>
+            <p>Each implementation principle should answer:</p>
+            <ol>
+              <li>What should teams design, build, or operate differently because of this principle?</li>
+              <li>What outcome should become easier, safer, or more reliable when the principle is applied?</li>
+              <li>How can a reviewer test whether the principle influenced the system design?</li>
+              <li>What implementation choices, interfaces, documentation, tests, evaluations, or operating signals would show it in practice?</li>
+            </ol>
+          </section>
+
+          <section class="section" aria-labelledby="principles-title">
+            <h2 class="section-title" id="principles-title">The 12 Principles</h2>
+            <div class="principles">
+
+              <div class="act">
+                <p class="act-kicker">Part 1 of 5</p>
+                <h3 class="act-title">Foundations</h3>
+                <p class="act-desc">Why the system exists and what it does, before any technology choice.</p>
+              </div>
+
+              <article class="principle" id="principle-1">
+                <div class="principle-margin">
+                  <p class="numeral">01</p>
+                  <p class="tag">Outcome</p>
+                </div>
+                <div class="body">
+                  <h3>Clarify the outcome and why it matters.</h3>
+                  <section class="detail" aria-labelledby="principle-1-intent">
+                    <h4 id="principle-1-intent">Implementation Intent</h4>
+                    <p class="intent">Every significant system or capability should begin by clarifying the outcome it is meant to create and why that outcome matters before technology, workflow, model, or interface choices are made. This should include who the outcome serves, what value it creates, what constraints matter, and what evidence will show whether the outcome was achieved.</p>
+                  </section>
+                  <section class="detail" aria-labelledby="principle-1-design-test">
+                    <h4 id="principle-1-design-test">Design Test</h4>
+                    <div class="quote">
+                      <p>Can a human or AI agent explain the intended outcome, who it serves, why it matters, and how success will be recognized before inspecting the implementation?</p>
+                    </div>
+                  </section>
+                  <section class="detail" aria-labelledby="principle-1-implications">
+                    <h4 id="principle-1-implications">Engineering Implications</h4>
+                    <ul class="implications">
+                      <li>Capture intended outcomes in specifications, README files, task cards, acceptance criteria, or evaluation plans.</li>
+                      <li>State who the outcome serves and what value it creates.</li>
+                      <li>Keep technology choices subordinate to the intended outcome.</li>
+                      <li>Revisit the outcome when the implementation starts optimizing for the tool instead of the value being created.</li>
+                    </ul>
+                  </section>
+                </div>
+              </article>
+
+              <article class="principle" id="principle-2">
+                <div class="principle-margin">
+                  <p class="numeral">02</p>
+                  <p class="tag">Separation</p>
+                </div>
+                <div class="body">
+                  <h3>Separate what the system does from how it does it.</h3>
+                  <section class="detail" aria-labelledby="principle-2-intent">
+                    <h4 id="principle-2-intent">Implementation Intent</h4>
+                    <p class="intent">Systems should describe what they need to do in a way that is not dependent on a specific tool, model, vendor, framework, library, or integration. The system's expected behavior, users, inputs, outputs, constraints, and evidence of success should remain clear even when implementation choices change.</p>
+                  </section>
+                  <section class="detail" aria-labelledby="principle-2-design-test">
+                    <h4 id="principle-2-design-test">Design Test</h4>
+                    <div class="quote">
+                      <p>Can the system's expected behavior, users, inputs, outputs, constraints, and evidence of success be described and evaluated without depending on a specific tool, model, vendor, framework, library, or integration?</p>
+                    </div>
+                  </section>
+                  <section class="detail" aria-labelledby="principle-2-implications">
+                    <h4 id="principle-2-implications">Engineering Implications</h4>
+                    <ul class="implications">
+                      <li>Describe expected system behavior before locking in implementation choices.</li>
+                      <li>Separate stable system responsibilities from replaceable tools, models, providers, frameworks, libraries, and integrations.</li>
+                      <li>Use adapters, configuration, or implementation notes where variation is likely or valuable.</li>
+                      <li>Avoid tying the system's purpose to a specific vendor or technology unless that dependency is intentional and documented.</li>
+                    </ul>
+                  </section>
+                </div>
+              </article>
+
+              <div class="act">
+                <p class="act-kicker">Part 2 of 5</p>
+                <h3 class="act-title">Boundaries &amp; simplicity</h3>
+                <p class="act-desc">Where the system draws its lines, and how it keeps the path to the outcome short.</p>
+              </div>
+
+              <article class="principle" id="principle-3">
+                <div class="principle-margin">
+                  <p class="numeral">03</p>
+                  <p class="tag">Boundaries</p>
+                </div>
+                <div class="body">
+                  <h3>Make boundaries explicit and enforceable.</h3>
+                  <section class="detail" aria-labelledby="principle-3-intent">
+                    <h4 id="principle-3-intent">Implementation Intent</h4>
+                    <p class="intent">AI-native systems should make safety, privacy, security, permissions, and public/private boundaries explicit in the design. Humans, AI agents, tools, and automations should operate within clear boundaries for what can be accessed, exposed, changed, automated, or published, and under what conditions.</p>
+                  </section>
+                  <section class="detail" aria-labelledby="principle-3-design-test">
+                    <h4 id="principle-3-design-test">Design Test</h4>
+                    <div class="quote">
+                      <p>Are the boundaries for access, exposure, change, automation, and publication explicit, and does the system enforce or escalate when those boundaries are reached?</p>
+                    </div>
+                  </section>
+                  <section class="detail" aria-labelledby="principle-3-implications">
+                    <h4 id="principle-3-implications">Engineering Implications</h4>
+                    <ul class="implications">
+                      <li>Identify sensitive data, credentials, confidential material, unsafe actions, and publication boundaries before implementation or release.</li>
+                      <li>Keep credentials, tokens, and secret values outside repositories, logs, docs, fixtures, screenshots, and public artifacts.</li>
+                      <li>Use scoped permissions and explicit access boundaries for humans, AI agents, tools, and integrations.</li>
+                      <li>Require approval for public/private boundary decisions, publication, destructive actions, and difficult-to-reverse changes.</li>
+                      <li>Prefer synthetic, generalized, or fictional examples when public artifacts could expose private or proprietary context.</li>
+                    </ul>
+                  </section>
+                </div>
+              </article>
+
+              <article class="principle" id="principle-4">
+                <div class="principle-margin">
+                  <p class="numeral">04</p>
+                  <p class="tag">Simplicity</p>
+                </div>
+                <div class="body">
+                  <h3>Keep the path to the outcome as simple as possible.</h3>
+                  <section class="detail" aria-labelledby="principle-4-intent">
+                    <h4 id="principle-4-intent">Implementation Intent</h4>
+                    <p class="intent">Work backward from the intended outcome and design the simplest path to achieve it. Do not assume the current workflow, handoffs, tools, or process steps should remain. The resulting path should require only the steps, decisions, coordination, and configuration needed to achieve the outcome while still making important choices, consequences, and recovery paths visible.</p>
+                  </section>
+                  <section class="detail" aria-labelledby="principle-4-design-test">
+                    <h4 id="principle-4-design-test">Design Test</h4>
+                    <div class="quote">
+                      <p>Starting from the intended outcome, is this the simplest path that can achieve it while preserving the choices, constraints, and recovery paths that matter?</p>
+                    </div>
+                  </section>
+                  <section class="detail" aria-labelledby="principle-4-implications">
+                    <h4 id="principle-4-implications">Engineering Implications</h4>
+                    <ul class="implications">
+                      <li>Redesign the path from the intended outcome instead of merely trimming an existing workflow.</li>
+                      <li>Use sensible defaults, templates, examples, automation, and guided workflows where they reduce repeated effort.</li>
+                      <li>Prefer configuration over code changes when project users need expected variation.</li>
+                      <li>Use progressive disclosure so common work stays simple without hiding advanced controls.</li>
+                      <li>Remove steps, handoffs, decisions, and coordination that do not improve the outcome, safety, traceability, or understanding.</li>
+                      <li>Make important state transitions and irreversible actions explicit.</li>
+                    </ul>
+                  </section>
+                </div>
+              </article>
+
+              <div class="act">
+                <p class="act-kicker">Part 3 of 5</p>
+                <h3 class="act-title">Usability, context &amp; knowledge</h3>
+                <p class="act-desc">What humans and agents need to act, and how that knowledge stays trustworthy over time.</p>
+              </div>
+
+              <article class="principle" id="principle-5">
+                <div class="principle-margin">
+                  <p class="numeral">05</p>
+                  <p class="tag">Legibility</p>
+                </div>
+                <div class="body">
+                  <h3>Make the system legible and usable by humans and agents.</h3>
+                  <section class="detail" aria-labelledby="principle-5-intent">
+                    <h4 id="principle-5-intent">Implementation Intent</h4>
+                    <p class="intent">Knowledge, data, and interfaces should be designed so both humans and AI agents can use the system to achieve the intended outcome easily and in line with the system's constraints. Human-facing surfaces should make the work clear and approachable. Agent-facing surfaces should provide the structure, context, constraints, examples, schemas, APIs, tools, or callable interfaces needed for reliable action where appropriate.</p>
+                  </section>
+                  <section class="detail" aria-labelledby="principle-5-design-test">
+                    <h4 id="principle-5-design-test">Design Test</h4>
+                    <div class="quote">
+                      <p>Does the system provide knowledge, data, and interfaces in forms that both humans and AI agents can easily use to achieve the intended outcome in line with the system's constraints?</p>
+                    </div>
+                  </section>
+                  <section class="detail" aria-labelledby="principle-5-implications">
+                    <h4 id="principle-5-implications">Engineering Implications</h4>
+                    <ul class="implications">
+                      <li>Treat documentation, examples, schemas, setup instructions, data structures, and interface contracts as product surfaces.</li>
+                      <li>Provide human-readable and machine-readable artifacts where practical.</li>
+                      <li>Expose APIs, tools, agent interfaces, or structured artifacts alongside human interfaces when the system should be agent-usable.</li>
+                      <li>Avoid burying essential behavior only in prose, code comments, chat history, or implicit conventions.</li>
+                    </ul>
+                  </section>
+                </div>
+              </article>
+
+              <article class="principle" id="principle-6">
+                <div class="principle-margin">
+                  <p class="numeral">06</p>
+                  <p class="tag">Context</p>
+                </div>
+                <div class="body">
+                  <h3>Put context within reach.</h3>
+                  <section class="detail" aria-labelledby="principle-6-intent">
+                    <h4 id="principle-6-intent">Implementation Intent</h4>
+                    <p class="intent">Systems should make the context required for decisions and actions explicit, findable, and usable. Relevant source material, signals, memory, provenance, assumptions, constraints, permissions, data boundaries, dependencies, and unresolved questions should be recorded in durable artifacts or system surfaces.</p>
+                  </section>
+                  <section class="detail" aria-labelledby="principle-6-design-test">
+                    <h4 id="principle-6-design-test">Design Test</h4>
+                    <div class="quote">
+                      <p>Can humans and AI agents use the relevant context, including source material, signals, memory, provenance, assumptions, constraints, and open questions, to make decisions and take action?</p>
+                    </div>
+                  </section>
+                  <section class="detail" aria-labelledby="principle-6-implications">
+                    <h4 id="principle-6-implications">Engineering Implications</h4>
+                    <ul class="implications">
+                      <li>Record source material, assumptions, constraints, decisions, acceptance criteria, and public/private boundaries.</li>
+                      <li>Structure knowledge for retrieval and action, not only human browsing.</li>
+                      <li>Treat signals as first-class inputs when they affect prioritization, decisions, routing, or automation.</li>
+                      <li>Preserve memory, provenance, and constraints where future decisions depend on them.</li>
+                      <li>Preserve open questions instead of inventing missing requirements.</li>
+                      <li>Include configuration, environment, data, and permission assumptions where they affect behavior.</li>
+                    </ul>
+                  </section>
+                </div>
+              </article>
+
+              <article class="principle" id="principle-7">
+                <div class="principle-margin">
+                  <p class="numeral">07</p>
+                  <p class="tag">Knowledge</p>
+                </div>
+                <div class="body">
+                  <h3>Manage knowledge and data as living assets.</h3>
+                  <section class="detail" aria-labelledby="principle-7-intent">
+                    <h4 id="principle-7-intent">Implementation Intent</h4>
+                    <p class="intent">Knowledge, data, and context should be managed as things that change over time. Systems should account for freshness, ownership, versioning, retention, deletion, provenance, and conditions under which knowledge or data should no longer be trusted or used.</p>
+                  </section>
+                  <section class="detail" aria-labelledby="principle-7-design-test">
+                    <h4 id="principle-7-design-test">Design Test</h4>
+                    <div class="quote">
+                      <p>Does the system make it clear who owns important knowledge and data, how current it is, where it came from, how it has changed, how long it should be retained, when it should be updated or removed, and when it should no longer be trusted?</p>
+                    </div>
+                  </section>
+                  <section class="detail" aria-labelledby="principle-7-implications">
+                    <h4 id="principle-7-implications">Engineering Implications</h4>
+                    <ul class="implications">
+                      <li>Record ownership, source, provenance, and update expectations for important knowledge and data.</li>
+                      <li>Distinguish current, stale, deprecated, synthetic, private, public, and untrusted data where it affects behavior.</li>
+                      <li>Define retention and deletion expectations for project artifacts, evaluation records, logs, datasets, and generated outputs where relevant.</li>
+                      <li>Preserve version history or change evidence when decisions depend on how knowledge or data changed over time.</li>
+                      <li>Review stale or uncertain context before using it for consequential decisions or automation.</li>
+                    </ul>
+                  </section>
+                </div>
+              </article>
+
+              <div class="act">
+                <p class="act-kicker">Part 4 of 5</p>
+                <h3 class="act-title">Autonomy &amp; collaboration</h3>
+                <p class="act-desc">Who decides, who acts, and how shared work stays coherent across people, agents, and systems.</p>
+              </div>
+
+              <article class="principle" id="principle-8">
+                <div class="principle-margin">
+                  <p class="numeral">08</p>
+                  <p class="tag">Autonomy</p>
+                </div>
+                <div class="body">
+                  <h3>Assign autonomy deliberately.</h3>
+                  <section class="detail" aria-labelledby="principle-8-intent">
+                    <h4 id="principle-8-intent">Implementation Intent</h4>
+                    <p class="intent">Systems should specify which decisions and actions are handled by humans, AI agents, automation, or a collaboration between them. The level of autonomy should be based on the consequence, reversibility, risk, and confidence required for the work. Approval and escalation paths should be explicit where needed.</p>
+                  </section>
+                  <section class="detail" aria-labelledby="principle-8-design-test">
+                    <h4 id="principle-8-design-test">Design Test</h4>
+                    <div class="quote">
+                      <p>For each significant decision or action, does the system assign human control, AI-agent action, automation, approval, or escalation based on the consequence, reversibility, risk, and confidence required?</p>
+                    </div>
+                  </section>
+                  <section class="detail" aria-labelledby="principle-8-implications">
+                    <h4 id="principle-8-implications">Engineering Implications</h4>
+                    <ul class="implications">
+                      <li>Define approval gates for publication, public/private boundaries, destructive actions, priority changes, and major scope decisions.</li>
+                      <li>Give AI agents enough context and tools to act within bounded responsibilities.</li>
+                      <li>Keep consequential decisions observable and reviewable.</li>
+                      <li>Prefer scoped permissions and reversible actions when agent autonomy increases.</li>
+                      <li>Escalate when the system reaches a boundary, lacks confidence, lacks required context, or detects a risk it should not handle alone.</li>
+                    </ul>
+                  </section>
+                </div>
+              </article>
+
+              <article class="principle" id="principle-9">
+                <div class="principle-margin">
+                  <p class="numeral">09</p>
+                  <p class="tag">Shared work</p>
+                </div>
+                <div class="body">
+                  <h3>Design for shared work across humans, agents, and systems.</h3>
+                  <section class="detail" aria-labelledby="principle-9-intent">
+                    <h4 id="principle-9-intent">Implementation Intent</h4>
+                    <p class="intent">When work spans multiple humans, AI agents, automations, tools, or systems, the system should make shared work explicit. Ownership, handoffs, shared state, authority, dependencies, and conflict resolution should be clear enough that work can move forward without relying on hidden assumptions or manual reconciliation.</p>
+                  </section>
+                  <section class="detail" aria-labelledby="principle-9-design-test">
+                    <h4 id="principle-9-design-test">Design Test</h4>
+                    <div class="quote">
+                      <p>When multiple humans, AI agents, automations, tools, or systems are involved, are ownership, handoffs, shared state, authority, dependencies, and conflict resolution clear enough for the work to continue reliably?</p>
+                    </div>
+                  </section>
+                  <section class="detail" aria-labelledby="principle-9-implications">
+                    <h4 id="principle-9-implications">Engineering Implications</h4>
+                    <ul class="implications">
+                      <li>Define who or what owns each significant task, decision, artifact, and state transition.</li>
+                      <li>Make handoffs and dependencies explicit when work crosses humans, agents, tools, repositories, or systems.</li>
+                      <li>Preserve shared state in durable artifacts or system records where future work depends on it.</li>
+                      <li>Define authority and escalation paths when humans, agents, automations, or systems disagree or produce conflicting outputs.</li>
+                      <li>Avoid coordination patterns that require private memory or manual reconstruction to continue work safely.</li>
+                    </ul>
+                  </section>
+                </div>
+              </article>
+
+              <div class="act">
+                <p class="act-kicker">Part 5 of 5</p>
+                <h3 class="act-title">Resilience &amp; accountability</h3>
+                <p class="act-desc">What happens when things go wrong, and how evidence turns into improvement.</p>
+              </div>
+
+              <article class="principle" id="principle-10">
+                <div class="principle-margin">
+                  <p class="numeral">10</p>
+                  <p class="tag">Resilience</p>
+                </div>
+                <div class="body">
+                  <h3>Handle uncertainty and failure gracefully.</h3>
+                  <section class="detail" aria-labelledby="principle-10-intent">
+                    <h4 id="principle-10-intent">Implementation Intent</h4>
+                    <p class="intent">AI-native systems should assume uncertainty, incomplete context, failed tool calls, unexpected outputs, unavailable dependencies, and edge cases will happen. Systems should define how uncertainty and failures are detected, contained, retried, corrected, recovered from, or escalated.</p>
+                  </section>
+                  <section class="detail" aria-labelledby="principle-10-design-test">
+                    <h4 id="principle-10-design-test">Design Test</h4>
+                    <div class="quote">
+                      <p>When the system lacks required context, produces an unexpected or uncertain output, hits a tool or integration failure, or reaches a boundary it should not cross, is there a clear path to detect, contain, retry, recover, or escalate?</p>
+                    </div>
+                  </section>
+                  <section class="detail" aria-labelledby="principle-10-implications">
+                    <h4 id="principle-10-implications">Engineering Implications</h4>
+                    <ul class="implications">
+                      <li>Identify likely failure modes before relying on automation or agent action.</li>
+                      <li>Define fallback, retry, rollback, correction, and escalation paths where appropriate.</li>
+                      <li>Make uncertainty visible when confidence, context quality, or tool results are insufficient.</li>
+                      <li>Prevent failures from silently producing consequential actions or public artifacts.</li>
+                      <li>Include failure and recovery cases in acceptance criteria, tests, evaluations, or review checklists when risk justifies it.</li>
+                    </ul>
+                  </section>
+                </div>
+              </article>
+
+              <article class="principle" id="principle-11">
+                <div class="principle-margin">
+                  <p class="numeral">11</p>
+                  <p class="tag">Traceability</p>
+                </div>
+                <div class="body">
+                  <h3>Make actions, decisions, outputs, and impact traceable.</h3>
+                  <section class="detail" aria-labelledby="principle-11-intent">
+                    <h4 id="principle-11-intent">Implementation Intent</h4>
+                    <p class="intent">Systems should preserve enough evidence to trace how humans, AI agents, and automation use the system: what actions or decisions were taken, what data, knowledge, and context were used, what logic or process was followed, what output was produced, and how that output affected the intended outcome.</p>
+                  </section>
+                  <section class="detail" aria-labelledby="principle-11-design-test">
+                    <h4 id="principle-11-design-test">Design Test</h4>
+                    <div class="quote">
+                      <p>Can humans and AI agents trace the important actions, decisions, data, knowledge, context, logic, outputs, and outcome impact involved in the system's use?</p>
+                    </div>
+                  </section>
+                  <section class="detail" aria-labelledby="principle-11-implications">
+                    <h4 id="principle-11-implications">Engineering Implications</h4>
+                    <ul class="implications">
+                      <li>Link Trello cards, commits, pull requests, documents, tests, evaluations, and publication artifacts where available.</li>
+                      <li>Record material architectural or operating decisions in the decision log.</li>
+                      <li>Preserve evidence of important inputs, actions, decisions, outputs, and outcome impacts.</li>
+                      <li>Make operational visibility sufficient for review, debugging, evaluation, and accountability.</li>
+                      <li>Maintain traceability from foundational principles to implementation principles, reference patterns, and reference implementations.</li>
+                    </ul>
+                  </section>
+                </div>
+              </article>
+
+              <article class="principle" id="principle-12">
+                <div class="principle-margin">
+                  <p class="numeral">12</p>
+                  <p class="tag">Improvement</p>
+                </div>
+                <div class="body">
+                  <h3>Use evidence from use to improve the system.</h3>
+                  <section class="detail" aria-labelledby="principle-12-intent">
+                    <h4 id="principle-12-intent">Implementation Intent</h4>
+                    <p class="intent">AI-native systems should include feedback loops that turn evidence from real use into improvements over time. Evidence from outcomes, user and agent behavior, errors, feedback, evaluations, and operational signals should be reviewed and used to improve system behavior, documentation, configuration, evaluation criteria, patterns, or implementation choices where appropriate.</p>
+                  </section>
+                  <section class="detail" aria-labelledby="principle-12-design-test">
+                    <h4 id="principle-12-design-test">Design Test</h4>
+                    <div class="quote">
+                      <p>Does the system have a feedback loop that captures evidence from use, reviews what it reveals, and turns it into improvements to future behavior or outcomes?</p>
+                    </div>
+                  </section>
+                  <section class="detail" aria-labelledby="principle-12-implications">
+                    <h4 id="principle-12-implications">Engineering Implications</h4>
+                    <ul class="implications">
+                      <li>Define which signals, feedback, outcomes, errors, and evaluation results should inform improvement.</li>
+                      <li>Include acceptance criteria and completion evidence before marking work complete.</li>
+                      <li>Feed validated learning back into specifications, standards, templates, reference patterns, documentation, configuration, or implementation choices.</li>
+                      <li>Distinguish between evidence that suggests improvement and evidence that justifies changing system behavior.</li>
+                      <li>Keep improvement loops reviewable when they affect consequential behavior or public artifacts.</li>
+                    </ul>
+                  </section>
+                </div>
+              </article>
+
+            </div>
+          </section>
+
+          <section class="review" id="review-criteria" aria-labelledby="review-title">
+            <h2 id="review-title">Review Criteria</h2>
+            <p>A project or artifact can be reviewed against these principles by asking whether it includes:</p>
+            <ol class="review-list">
+              <li>A clear intended outcome, audience, value, constraints, and evidence of success.</li>
+              <li>A description of what the system does that does not depend on a specific implementation choice.</li>
+              <li>Explicit safety, privacy, security, permission, and public/private boundaries.</li>
+              <li>The simplest responsible path from intended outcome to result.</li>
+              <li>Knowledge, data, and interfaces that humans and AI agents can easily use in line with system constraints.</li>
+              <li>Context that is explicit, findable, and usable for decisions and action.</li>
+              <li>Knowledge and data lifecycle expectations for freshness, ownership, provenance, retention, deletion, and trust.</li>
+              <li>Deliberate autonomy boundaries, approval paths, and escalation paths.</li>
+              <li>Clear ownership, handoffs, shared state, authority, dependencies, and conflict resolution where multiple actors are involved.</li>
+              <li>Uncertainty and failure detection, containment, retry, recovery, and escalation paths where risk justifies them.</li>
+              <li>Traceability across actions, decisions, data, knowledge, context, logic, outputs, and outcome impact.</li>
+              <li>A feedback loop that uses evidence from real use to improve future behavior or outcomes.</li>
+            </ol>
+          </section>
+        </div>
+      </div>
+    </main>
+    <script>
+      (function () {
+        var links = Array.prototype.slice.call(document.querySelectorAll(".toc a"));
+        var linkById = {};
+        links.forEach(function (link) {
+          var id = link.getAttribute("href").slice(1);
+          linkById[id] = link;
+        });
+
+        var targets = Object.keys(linkById)
+          .map(function (id) {
+            return document.getElementById(id);
+          })
+          .filter(Boolean);
+
+        if (!("IntersectionObserver" in window) || targets.length === 0) {
+          return;
+        }
+
+        var setActive = function (id) {
+          links.forEach(function (link) {
+            link.classList.toggle("active", link === linkById[id]);
+          });
+        };
+
+        var observer = new IntersectionObserver(
+          function (entries) {
+            entries.forEach(function (entry) {
+              if (entry.isIntersecting) {
+                setActive(entry.target.id);
+              }
+            });
+          },
+          { rootMargin: "-10% 0px -75% 0px", threshold: 0 }
+        );
+
+        targets.forEach(function (target) {
+          observer.observe(target);
+        });
+      })();
+    </script>
+  </body>
+</html>

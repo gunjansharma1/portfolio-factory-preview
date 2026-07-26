@@ -1,0 +1,3 @@
+# generated-by-promote-content: staging-disallow-all
+User-agent: *
+Disallow: /
