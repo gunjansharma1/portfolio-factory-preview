@@ -261,7 +261,7 @@
     <main class="page">
       <header>
         <h1>Foundational Design Principles for AI-Native Systems</h1>
-        <p class="intro">These principles represent the foundational beliefs that guide the design of AI-native systems. While technologies, architectures, and implementation patterns will evolve, these principles will likely endure.</p>
+        <p class="intro">These principles represent the foundational beliefs that guide the design of AI-native systems. While technologies, architectures, and implementation patterns will evolve, these principles are likely endure.</p>
       </header>
 
       <section aria-label="Principles">
@@ -280,7 +280,7 @@
               <section class="detail" aria-labelledby="principle-1-design-test">
                 <h4 id="principle-1-design-test">Design Test</h4>
                 <div class="quote">
-                  <p>Can I clearly articulate the desired outcome before discussing the technology?</p>
+                  <p>Remove the proposed technology from the discussion. Can the team still state whose outcome matters, what must change for them, which constraints matter, and what evidence would demonstrate success? If the outcome can only be described in terms of deploying or using the technology, the test fails.</p>
                 </div>
               </section>
             </div>
@@ -300,7 +300,7 @@
               <section class="detail" aria-labelledby="principle-2-design-test">
                 <h4 id="principle-2-design-test">Design Test</h4>
                 <div class="quote">
-                  <p>Can both humans and AI agents effectively discover, understand, and use this capability?</p>
+                  <p>Give a representative human and AI agent access to the capability through their intended interfaces. Can each discover what it does, understand its constraints, and complete a representative task without undocumented assistance? If either depends on hidden conventions or a privileged explanation, the test fails.</p>
                 </div>
               </section>
             </div>
@@ -320,7 +320,7 @@
               <section class="detail" aria-labelledby="principle-3-design-test">
                 <h4 id="principle-3-design-test">Design Test</h4>
                 <div class="quote">
-                  <p>Have I removed unnecessary complexity from achieving the desired outcome?</p>
+                  <p>Map every step, decision, handoff, and configuration choice between the user's starting point and the intended outcome. Can each be justified by value, necessary control, understanding, or recoverability? If something can be removed, combined, defaulted, or automated without materially weakening those qualities, the path is not yet simple enough.</p>
                 </div>
               </section>
             </div>
@@ -340,7 +340,7 @@
               <section class="detail" aria-labelledby="principle-4-design-test">
                 <h4 id="principle-4-design-test">Design Test</h4>
                 <div class="quote">
-                  <p>Have I intentionally assigned the appropriate level of autonomy for each capability?</p>
+                  <p>Select a consequential decision or action. Can the design justify who decides, who acts, when approval or escalation is required, and how the action can be stopped or reversed based on consequence, reversibility, risk, and uncertainty? If autonomy is assigned primarily because the technology can perform the action, the test fails.</p>
                 </div>
               </section>
             </div>
@@ -360,7 +360,7 @@
               <section class="detail" aria-labelledby="principle-5-design-test">
                 <h4 id="principle-5-design-test">Design Test</h4>
                 <div class="quote">
-                  <p>Does every human and AI agent have what it needs to make the right decision and take the right action?</p>
+                  <p>Select a representative consequential decision. Can the responsible human or AI agent identify the relevant sources, assumptions, constraints, permissions, uncertainties, and missing context, and explain why the proposed action follows from them? If critical context is inaccessible or unsupported assumptions remain hidden, the test fails.</p>
                 </div>
               </section>
             </div>

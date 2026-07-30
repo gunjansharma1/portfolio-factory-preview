@@ -171,23 +171,11 @@
         text-transform: uppercase;
       }
 
-      .purpose,
-      .framing {
+      .purpose {
         max-width: 840px;
       }
 
       .purpose p {
-        color: var(--color-muted);
-      }
-
-      .framing {
-        padding: 28px;
-        border: 1px solid var(--color-line);
-        border-radius: 8px;
-        background: linear-gradient(180deg, var(--color-surface), var(--color-page));
-      }
-
-      .framing p {
         color: var(--color-muted);
       }
 
@@ -203,12 +191,6 @@
         padding-left: 4px;
       }
 
-      .framing ol,
-      .review-list {
-        margin-top: 14px;
-        color: var(--color-muted);
-      }
-
       /* Principle sequence: margin numerals and pull-quotes */
 
       .principles {
@@ -217,7 +199,7 @@
 
       .principle {
         display: grid;
-        grid-template-columns: 84px minmax(0, 1fr);
+        grid-template-columns: 108px minmax(0, 1fr);
         column-gap: 24px;
         row-gap: 14px;
         padding: 32px 0;
@@ -330,25 +312,6 @@
         color: var(--color-accent);
       }
 
-      .review {
-        max-width: 840px;
-        padding: 28px;
-        border: 1px solid var(--color-line);
-        border-radius: 8px;
-        background: var(--color-page);
-      }
-
-      .review h2 {
-        margin-bottom: 10px;
-        font-size: clamp(1.28rem, 2vw, 1.72rem);
-        line-height: 1.18;
-        font-weight: 730;
-      }
-
-      .review p {
-        color: var(--color-muted);
-      }
-
       ::selection {
         background: var(--color-accent-soft);
         color: var(--color-text);
@@ -391,10 +354,6 @@
           gap: 42px;
         }
 
-        .framing,
-        .review {
-          padding: 22px;
-        }
       }
 
       @media (max-width: 560px) {
@@ -444,7 +403,6 @@
           <h2 id="toc-title">Topics</h2>
           <nav aria-label="Implementation principles">
             <a class="toc-topic" href="#purpose">Purpose</a>
-            <a class="toc-topic" href="#framing-title">Principle framing</a>
             <div class="toc-group">
               <a class="toc-topic" href="#principles-title">Principles</a>
               <div class="toc-children" aria-label="Principle list">
@@ -458,11 +416,11 @@
                 <a href="#principle-8">8. Assign autonomy deliberately</a>
                 <a href="#principle-9">9. Design for shared work</a>
                 <a href="#principle-10">10. Handle uncertainty</a>
-                <a href="#principle-11">11. Make impact traceable</a>
-                <a href="#principle-12">12. Improve from use</a>
+                <a href="#principle-11">11. Make activity auditable</a>
+                <a href="#principle-12">12. Observe system behavior</a>
+                <a href="#principle-13">13. Improve from use</a>
               </div>
             </div>
-            <a class="toc-topic" href="#review-criteria">Review criteria</a>
           </nav>
         </aside>
 
@@ -473,19 +431,8 @@
             <p>They are intended to help AI-native systems become outcome-oriented, usable by both humans and AI agents, simple to operate, deliberate about autonomy, and grounded in enough context and evidence for sound decisions, actions, and improvement.</p>
           </section>
 
-          <section class="section framing" aria-labelledby="framing-title">
-            <h2 class="section-title" id="framing-title">Principle Framing</h2>
-            <p>Each implementation principle should answer:</p>
-            <ol>
-              <li>What should teams design, build, or operate differently because of this principle?</li>
-              <li>What outcome should become easier, safer, or more reliable when the principle is applied?</li>
-              <li>How can a reviewer test whether the principle influenced the system design?</li>
-              <li>What implementation choices, interfaces, documentation, tests, evaluations, or operating signals would show it in practice?</li>
-            </ol>
-          </section>
-
           <section class="section" aria-labelledby="principles-title">
-            <h2 class="section-title" id="principles-title">The 12 Principles</h2>
+            <h2 class="section-title" id="principles-title">The 13 Principles</h2>
             <div class="principles">
 
               <article class="principle" id="principle-1">
@@ -502,7 +449,7 @@
                   <section class="detail" aria-labelledby="principle-1-design-test">
                     <h4 id="principle-1-design-test">Design Test</h4>
                     <div class="quote">
-                      <p>Can a human or AI agent explain the intended outcome, who it serves, why it matters, and how success will be recognized before inspecting the implementation?</p>
+                      <p>Before inspecting implementation details, can a human or AI agent find a durable statement of who the outcome serves, why it matters, which constraints apply, and what evidence will demonstrate success, and accurately restate it? If not, the implementation lacks a usable outcome anchor.</p>
                     </div>
                   </section>
                   <section class="detail" aria-labelledby="principle-1-implications">
@@ -531,7 +478,7 @@
                   <section class="detail" aria-labelledby="principle-2-design-test">
                     <h4 id="principle-2-design-test">Design Test</h4>
                     <div class="quote">
-                      <p>Can the system's expected behavior, users, inputs, outputs, constraints, and evidence of success be described and evaluated without depending on a specific tool, model, vendor, framework, library, or integration?</p>
+                      <p>Replace the named model, tool, vendor, framework, library, or integration with a plausible alternative. Can the expected behavior, inputs, outputs, constraints, and acceptance tests remain substantially unchanged? If the system's requirements must be rewritten solely because the implementation changes, the separation fails unless that dependency is intentional and documented.</p>
                     </div>
                   </section>
                   <section class="detail" aria-labelledby="principle-2-implications">
@@ -555,21 +502,26 @@
                   <h3>Make boundaries explicit and enforceable.</h3>
                   <section class="detail" aria-labelledby="principle-3-intent">
                     <h4 id="principle-3-intent">Implementation Intent</h4>
-                    <p class="intent">AI-native systems should make safety, privacy, security, permissions, and public/private boundaries explicit in the design. Humans, AI agents, tools, and automations should operate within clear boundaries for what can be accessed, exposed, changed, automated, or published, and under what conditions.</p>
+                    <p class="intent">AI-native systems should make authorization, safety, privacy, security, and public/private boundaries explicit in the design. For each human, AI agent, automation, tool, or integration, the system should determine which actions may be performed on which resources and under which conditions. Those boundaries should be enforced at the point of action, with denial or escalation when authority is absent or ambiguous.</p>
                   </section>
                   <section class="detail" aria-labelledby="principle-3-design-test">
                     <h4 id="principle-3-design-test">Design Test</h4>
                     <div class="quote">
-                      <p>Are the boundaries for access, exposure, change, automation, and publication explicit, and does the system enforce or escalate when those boundaries are reached?</p>
+                      <p>Choose representative permitted and prohibited actions for each significant human, AI agent, automation, tool, or integration. Can the system determine from durable policy who or what may perform each action, on which resource, and under which conditions, and enforce that decision at the point of action? If a boundary exists only in prose, a prohibited action succeeds, or an ambiguous case neither denies nor escalates, the test fails.</p>
                     </div>
                   </section>
                   <section class="detail" aria-labelledby="principle-3-implications">
                     <h4 id="principle-3-implications">Engineering Implications</h4>
                     <ul class="implications">
-                      <li>Identify sensitive data, credentials, confidential material, unsafe actions, and publication boundaries before implementation or release.</li>
+                      <li>Identify sensitive data, protected resources, credentials, confidential material, unsafe actions, and publication boundaries before implementation or release.</li>
+                      <li>Define authorization policies in a durable, inspectable form that identifies the actor, action, resource, applicable conditions, and required approval or escalation.</li>
+                      <li>Distinguish authority to read, create, change, delete, execute, publish, delegate, or approve where those actions carry different consequences.</li>
+                      <li>Enforce authorization at the point of action rather than relying only on documentation, prompts, interface visibility, or an actor's stated intent.</li>
+                      <li>Deny or escalate when no applicable authorization exists, the policy is ambiguous, or required context is missing. Do not infer authority merely because an actor can technically access a capability or resource.</li>
+                      <li>Give AI agents, automations, tools, and integrations the narrowest practical default scope, with additional authority granted explicitly and reviewably.</li>
+                      <li>Require explicit approval for public/private boundary decisions, publication, destructive actions, permission changes, delegation, and other difficult-to-reverse actions where appropriate.</li>
+                      <li>Preserve durable, linkable records of consequential authorization decisions, including the actor, requested action, target resource, applicable policy or policy version, decision, and any approval or escalation, so the authority can be reconstructed for auditability.</li>
                       <li>Keep credentials, tokens, and secret values outside repositories, logs, docs, fixtures, screenshots, and public artifacts.</li>
-                      <li>Use scoped permissions and explicit access boundaries for humans, AI agents, tools, and integrations.</li>
-                      <li>Require approval for public/private boundary decisions, publication, destructive actions, and difficult-to-reverse changes.</li>
                       <li>Prefer synthetic, generalized, or fictional examples when public artifacts could expose private or proprietary context.</li>
                     </ul>
                   </section>
@@ -590,7 +542,7 @@
                   <section class="detail" aria-labelledby="principle-4-design-test">
                     <h4 id="principle-4-design-test">Design Test</h4>
                     <div class="quote">
-                      <p>Starting from the intended outcome, is this the simplest path that can achieve it while preserving the choices, constraints, and recovery paths that matter?</p>
+                      <p>Run a representative common task from its starting point to its outcome and account for every step, decision, handoff, and configuration choice. If any can be removed, combined, defaulted, or automated without sacrificing the outcome, necessary control, understanding, or recovery, the path is not yet simple enough.</p>
                     </div>
                   </section>
                   <section class="detail" aria-labelledby="principle-4-implications">
@@ -621,7 +573,7 @@
                   <section class="detail" aria-labelledby="principle-5-design-test">
                     <h4 id="principle-5-design-test">Design Test</h4>
                     <div class="quote">
-                      <p>Does the system provide knowledge, data, and interfaces in forms that both humans and AI agents can easily use to achieve the intended outcome in line with the system's constraints?</p>
+                      <p>Give a new representative human and AI agent only their intended system entry points. Can each find the capability, understand its inputs, outputs, constraints, and failure states, complete a representative task, and recognize whether it succeeded without undocumented help? If either cannot, the test fails.</p>
                     </div>
                   </section>
                   <section class="detail" aria-labelledby="principle-5-implications">
@@ -650,7 +602,7 @@
                   <section class="detail" aria-labelledby="principle-6-design-test">
                     <h4 id="principle-6-design-test">Design Test</h4>
                     <div class="quote">
-                      <p>Can humans and AI agents use the relevant context, including source material, signals, memory, provenance, assumptions, constraints, and open questions, to make decisions and take action?</p>
+                      <p>Select a consequential decision or action. At the point it must be made, can the responsible actor retrieve the current source material, provenance, assumptions, constraints, permissions, dependencies, and unresolved questions that affect it? If the actor must search transient conversations, rely on private memory, or invent missing context, the test fails.</p>
                     </div>
                   </section>
                   <section class="detail" aria-labelledby="principle-6-implications">
@@ -681,7 +633,7 @@
                   <section class="detail" aria-labelledby="principle-7-design-test">
                     <h4 id="principle-7-design-test">Design Test</h4>
                     <div class="quote">
-                      <p>Does the system make it clear who owns important knowledge and data, how current it is, where it came from, how it has changed, how long it should be retained, when it should be updated or removed, and when it should no longer be trusted?</p>
+                      <p>Select an important knowledge or data asset. Can the system identify its owner, source, current version, freshness, trust state, retention expectation, and removal conditions? Then introduce a stale, superseded, or untrusted version. If the system cannot identify and appropriately handle it, the test fails.</p>
                     </div>
                   </section>
                   <section class="detail" aria-labelledby="principle-7-implications">
@@ -711,7 +663,7 @@
                   <section class="detail" aria-labelledby="principle-8-design-test">
                     <h4 id="principle-8-design-test">Design Test</h4>
                     <div class="quote">
-                      <p>For each significant decision or action, does the system assign human control, AI-agent action, automation, approval, or escalation based on the consequence, reversibility, risk, and confidence required?</p>
+                      <p>Inventory the system's significant decisions and actions. For each, are the actor, authority, trigger, approval or escalation path, and reversibility explicit and justified by consequence, risk, and uncertainty? Test a high-consequence or low-confidence case. If it proceeds beyond the assigned authority or without required review, the test fails.</p>
                     </div>
                   </section>
                   <section class="detail" aria-labelledby="principle-8-implications">
@@ -741,7 +693,7 @@
                   <section class="detail" aria-labelledby="principle-9-design-test">
                     <h4 id="principle-9-design-test">Design Test</h4>
                     <div class="quote">
-                      <p>When multiple humans, AI agents, automations, tools, or systems are involved, are ownership, handoffs, shared state, authority, dependencies, and conflict resolution clear enough for the work to continue reliably?</p>
+                      <p>Interrupt or hand off a representative multi-actor workflow. Can the next actor resume from durable shared state and determine current ownership, authority, dependencies, pending work, and unresolved conflicts without relying on a previous participant's memory? If not, the shared-work design fails.</p>
                     </div>
                   </section>
                   <section class="detail" aria-labelledby="principle-9-implications">
@@ -771,7 +723,7 @@
                   <section class="detail" aria-labelledby="principle-10-design-test">
                     <h4 id="principle-10-design-test">Design Test</h4>
                     <div class="quote">
-                      <p>When the system lacks required context, produces an unexpected or uncertain output, hits a tool or integration failure, or reaches a boundary it should not cross, is there a clear path to detect, contain, retry, recover, or escalate?</p>
+                      <p>Exercise representative cases involving missing context, uncertain output, an unavailable dependency, an unexpected response, and a boundary violation. Does the system detect the condition, contain its effects, avoid unsupported consequential action, and follow the intended retry, recovery, correction, or escalation path? If the failure remains silent or requires manual reconstruction before it can be handled, the test fails.</p>
                     </div>
                   </section>
                   <section class="detail" aria-labelledby="principle-10-implications">
@@ -790,28 +742,31 @@
               <article class="principle" id="principle-11">
                 <div class="principle-margin">
                   <p class="numeral">11</p>
-                  <p class="tag">Traceability</p>
+                  <p class="tag">Auditability</p>
                 </div>
                 <div class="body">
-                  <h3>Make actions, decisions, outputs, and impact traceable.</h3>
+                  <h3>Make actions, decisions, outputs, and impact auditable.</h3>
                   <section class="detail" aria-labelledby="principle-11-intent">
                     <h4 id="principle-11-intent">Implementation Intent</h4>
-                    <p class="intent">Systems should preserve enough evidence to trace how humans, AI agents, and automation use the system: what actions or decisions were taken, what data, knowledge, and context were used, what logic or process was followed, what output was produced, and how that output affected the intended outcome.</p>
+                    <p class="intent">Systems should preserve proportionate, durable evidence sufficient to reconstruct, after the fact, how humans, AI agents, and automation used the system: who or what acted, under what authority, what action or decision was taken, what data, knowledge, and context informed it, what policy, logic, or process was followed, what output was produced, and what effect it had on the intended outcome.</p>
+                    <p class="intent">Auditability should not require recording unnecessary sensitive data or claiming an outcome impact that the available evidence cannot support.</p>
                   </section>
                   <section class="detail" aria-labelledby="principle-11-design-test">
                     <h4 id="principle-11-design-test">Design Test</h4>
                     <div class="quote">
-                      <p>Can humans and AI agents trace the important actions, decisions, data, knowledge, context, logic, outputs, and outcome impact involved in the system's use?</p>
+                      <p>Select a consequential action, decision, or output. Using only durable records, trace it backward to the actor, the actor's authority, the relevant inputs and context, and the policy, logic, or process followed, and forward to its output and supported outcome impact. If the impact cannot yet be determined, the record should make that uncertainty explicit. If any material part of the chain requires a participant's recollection, informal conversation, or unsupported inference, the test fails.</p>
                     </div>
                   </section>
                   <section class="detail" aria-labelledby="principle-11-implications">
                     <h4 id="principle-11-implications">Engineering Implications</h4>
                     <ul class="implications">
-                      <li>Link Trello cards, commits, pull requests, documents, tests, evaluations, and publication artifacts where available.</li>
-                      <li>Record material architectural or operating decisions in the decision log.</li>
-                      <li>Preserve evidence of important inputs, actions, decisions, outputs, and outcome impacts.</li>
-                      <li>Make operational visibility sufficient for review, debugging, evaluation, and accountability.</li>
-                      <li>Maintain traceability from foundational principles to implementation principles, reference patterns, and reference implementations.</li>
+                      <li>Define which actions, decisions, outputs, and impacts require audit evidence based on their consequence and risk.</li>
+                      <li>Preserve durable, linkable evidence of significant actors, authorization decisions, inputs, actions, decisions, outputs, and supported outcome impacts.</li>
+                      <li>Record material architectural and operating decisions in durable decision records.</li>
+                      <li>Use stable identifiers, timestamps, versions, or correlation references where they are needed to reconstruct a chain across actors and systems.</li>
+                      <li>Protect the integrity, confidentiality, access, and retention of audit evidence.</li>
+                      <li>Make decision chains reconstructable without relying on private memory, informal conversation, or transient chat history.</li>
+                      <li>Keep the purpose of audit evidence distinct from operational observability signals. A shared event or record may support both purposes when appropriate.</li>
                     </ul>
                   </section>
                 </div>
@@ -820,22 +775,55 @@
               <article class="principle" id="principle-12">
                 <div class="principle-margin">
                   <p class="numeral">12</p>
-                  <p class="tag">Improvement</p>
+                  <p class="tag">Observability</p>
                 </div>
                 <div class="body">
-                  <h3>Use evidence from use to improve the system.</h3>
+                  <h3>Make system behavior observable while it operates.</h3>
                   <section class="detail" aria-labelledby="principle-12-intent">
                     <h4 id="principle-12-intent">Implementation Intent</h4>
-                    <p class="intent">AI-native systems should include feedback loops that turn evidence from real use into improvements over time. Evidence from outcomes, user and agent behavior, errors, feedback, evaluations, and operational signals should be reviewed and used to improve system behavior, documentation, configuration, evaluation criteria, patterns, or implementation choices where appropriate.</p>
+                    <p class="intent">Systems should expose timely, usable signals about their current operation, including state, health, activity, relevant uncertainty, workload, and proximity to a boundary or failure, so humans and AI agents can understand what is happening and determine what to do next without waiting for a post-hoc review.</p>
+                    <p class="intent">The required visibility should be proportionate to the system's consequence, autonomy, and operating model.</p>
                   </section>
                   <section class="detail" aria-labelledby="principle-12-design-test">
                     <h4 id="principle-12-design-test">Design Test</h4>
                     <div class="quote">
-                      <p>Does the system have a feedback loop that captures evidence from use, reviews what it reveals, and turns it into improvements to future behavior or outcomes?</p>
+                      <p>Observe a representative capability during normal, degraded, blocked, and near-boundary conditions. Can the intended human or AI-agent consumer determine the capability's current state, what requires attention, and the appropriate next action from signals available while it operates? If answering requires stopping the system, waiting for a later audit, relying on stale information, or guessing, the test fails.</p>
                     </div>
                   </section>
                   <section class="detail" aria-labelledby="principle-12-implications">
                     <h4 id="principle-12-implications">Engineering Implications</h4>
+                    <ul class="implications">
+                      <li>Emit timely state, health, activity, and transition signals for capabilities, agents, automations, and important dependencies while they operate, not only after completion.</li>
+                      <li>Make relevant uncertainty and proximity to approval, authorization, safety, or operating boundaries visible when they affect what an actor should do next.</li>
+                      <li>Distinguish human-facing signals, such as dashboards and alerts, from agent-facing signals, such as structured status, events, and callable health checks, where their needs differ.</li>
+                      <li>Surface backlogs, queues, stalled work, and delays when they affect coordination between actors.</li>
+                      <li>Define how consumers can determine whether an operational signal is current, stale, incomplete, or unavailable.</li>
+                      <li>Avoid exposing credentials, sensitive data, or unnecessary private context through operational signals.</li>
+                      <li>Keep observability proportionate; not every system requires a dashboard, continuous telemetry, or the same depth of instrumentation.</li>
+                    </ul>
+                  </section>
+                </div>
+              </article>
+
+              <article class="principle" id="principle-13">
+                <div class="principle-margin">
+                  <p class="numeral">13</p>
+                  <p class="tag">Improvement</p>
+                </div>
+                <div class="body">
+                  <h3>Use evidence from use to improve the system.</h3>
+                  <section class="detail" aria-labelledby="principle-13-intent">
+                    <h4 id="principle-13-intent">Implementation Intent</h4>
+                    <p class="intent">AI-native systems should include feedback loops that turn evidence from real use into improvements over time. Evidence from outcomes, user and agent behavior, errors, feedback, evaluations, and operational signals should be reviewed and used to improve system behavior, documentation, configuration, evaluation criteria, patterns, or implementation choices where appropriate.</p>
+                  </section>
+                  <section class="detail" aria-labelledby="principle-13-design-test">
+                    <h4 id="principle-13-design-test">Design Test</h4>
+                    <div class="quote">
+                      <p>Choose a real outcome signal, error, evaluation result, or piece of user or agent feedback. Can the system trace it through capture, review, a documented decision to change or not change the system, and validation of the resulting decision? If evidence is collected but does not reach a review decision, or a change is made without evaluating its effect, the feedback loop is incomplete.</p>
+                    </div>
+                  </section>
+                  <section class="detail" aria-labelledby="principle-13-implications">
+                    <h4 id="principle-13-implications">Engineering Implications</h4>
                     <ul class="implications">
                       <li>Define which signals, feedback, outcomes, errors, and evaluation results should inform improvement.</li>
                       <li>Include acceptance criteria and completion evidence before marking work complete.</li>
@@ -850,24 +838,6 @@
             </div>
           </section>
 
-          <section class="review" id="review-criteria" aria-labelledby="review-title">
-            <h2 id="review-title">Review Criteria</h2>
-            <p>A project or artifact can be reviewed against these principles by asking whether it includes:</p>
-            <ol class="review-list">
-              <li>A clear intended outcome, audience, value, constraints, and evidence of success.</li>
-              <li>A description of what the system does that does not depend on a specific implementation choice.</li>
-              <li>Explicit safety, privacy, security, permission, and public/private boundaries.</li>
-              <li>The simplest responsible path from intended outcome to result.</li>
-              <li>Knowledge, data, and interfaces that humans and AI agents can easily use in line with system constraints.</li>
-              <li>Context that is explicit, findable, and usable for decisions and action.</li>
-              <li>Knowledge and data lifecycle expectations for freshness, ownership, provenance, retention, deletion, and trust.</li>
-              <li>Deliberate autonomy boundaries, approval paths, and escalation paths.</li>
-              <li>Clear ownership, handoffs, shared state, authority, dependencies, and conflict resolution where multiple actors are involved.</li>
-              <li>Uncertainty and failure detection, containment, retry, recovery, and escalation paths where risk justifies them.</li>
-              <li>Traceability across actions, decisions, data, knowledge, context, logic, outputs, and outcome impact.</li>
-              <li>A feedback loop that uses evidence from real use to improve future behavior or outcomes.</li>
-            </ol>
-          </section>
         </div>
       </div>
     </main>
